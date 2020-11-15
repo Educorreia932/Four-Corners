@@ -1,0 +1,30 @@
+:alias input vC # global buffered input key
+
+: main
+	loop
+		# count down 1/60th of a second:
+		vf := 1
+		delay := vf
+
+		i := 1
+		# simple animation:
+		sprite v0 v1 5
+		
+		v0 += 2
+		v1 += 3
+		
+		# check keys:
+		input := OCTO_KEY_W
+		
+		if input key then jump done
+
+		# if we've spent less than 1/60th of a second,
+		# loop until the timer decrements:
+		loop
+			vf := delay
+			if vf != 0 then
+		again
+	again
+	
+: done
+	:breakpoint pressed-any-key
