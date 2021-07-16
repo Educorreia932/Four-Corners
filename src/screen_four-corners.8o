@@ -58,27 +58,69 @@
 	
 : cursor
 	0x00 0x00 0x00 0x00 0x00 0x00 0x01 0x80 0x01 0x80 0x01 0x80 0x00 0x00 0x1C 0x38 0x1C 0x38 0x00 0x00 0x01 0x80 0x01 0x80 0x01 0x80 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
-	
+
+# Macro to draw a sprite
 :macro draw A {
 	i := A
 	x := x_pos
 	y := y_pos
+
 	loop
 		sprite y x 0
+
 		x_target := x_pos
 		x_target += length
+
 		y_target := y_pos
 		y_target += height
+		
 		i += stride
 		x += 16
+
 		if x == x_target then y += 16
-		if x == x_target then	x := x_pos
+		if x == x_target then x := x_pos
 		if y != y_target then
 	again
-	}
+}
 
-:alias timer v4
-:alias counter	v5
+:macro draw_cat {
+	x_pos := 34
+	y_pos := 32
+	length := 32
+	height := 32
+
+	draw cat
+}
+
+:macro draw_heart {
+	x_pos := 4
+	y_pos := 36
+	length := 32
+	height := 32
+
+	draw heart
+}
+
+:macro draw_zebra {
+	x_pos := 35
+	y_pos := 66
+	length := 32
+	height := 32
+
+	draw zebra
+}
+
+:macro draw_pig {
+	x_pos := 4
+	y_pos := 68
+	length := 32
+	height := 32
+
+	draw pig
+}
+
+:alias timer        v4
+:alias counter	    v5
 :alias stride		v6
 :alias x	    	v7
 :alias y      		v8
@@ -88,9 +130,10 @@
 :alias y_target 	vc
 :alias length		vd
 :alias height		ve
+:alias selected     vf
 
 : main
-	hires
+	hires  # Set high resolution mode
 	plane 3
 	# draw title
 	stride := 64
@@ -98,42 +141,28 @@
 	height := 128
 	draw background
 
-	x_pos := 34
-	y_pos := 32
-	length := 32
-	height := 32
-	draw cat
-	
-	x_pos := 4
-	y_pos := 36
-	length := 32
-	height := 32
-	draw heart
-	
-	x_pos := 35
-	y_pos := 66
-	length := 32
-	height := 32
-	draw zebra
-	
-	x_pos := 4
-	y_pos := 68
-	length := 32
-	height := 32
-	draw pig
+	draw_cat
+	draw_heart
+	draw_zebra
+	draw_pig
 	
 	x_pos := 25
 	y_pos := 54
 	length := 16
 	height := 16
+
+	selected := 0
 	
+	# Main game loop
 	loop
-		v0 := OCTO_KEY_A if v0 key then x_pos += 1
-		v0 := OCTO_KEY_W if v0 key then y_pos -= 1
-		v0 := OCTO_KEY_S if v0 key then y_pos += 1
-		v0 := OCTO_KEY_D if v0 key then x_pos -= 1
-		draw cursor
-		draw cursor
-		
+		v0 := OCTO_KEY_W if v0 key then selected -= 2
+		v0 := OCTO_KEY_A if v0 key then selected += 1
+		v0 := OCTO_KEY_S if v0 key then selected += 2
+		v0 := OCTO_KEY_D if v0 key then selected -= 1
+
+		if selected == 0 then draw_cat
+		if selected == 1 then draw_heart
+		if selected == 2 then draw_zebra
+		if selected == 3 then draw_pig
 	again
 	
