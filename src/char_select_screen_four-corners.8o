@@ -56,9 +56,6 @@
 	0xC0 0x40 0xE1 0xC0 0xE3 0xC0 0xFF 0xC0 0xFF 0xC0 0x3F 0xC0 0x1F 0xC0 0x1F 0xC0 0x0F 0xC0 0x0F 0xC0 0x07 0xC0 0x03 0xC0 0xFB 0xC0 0xFF 0xC0 0xFF 0xC0 0xFF 0xC0 0xC0 0x40 0x21 0xC0 0x23 0xC0 0x3F 0xC0 0xFF 0xC0 0xDF 0x40 0xEE 0x40 0xEF 0x40 0xF7 0x40 0xF7 0xC0 0xFB 0xC0 0xFF 0xC0 0xFF 0xC0 0x07 0xC0 0x07 0xC0 0x63 0xC0
 	0xFE 0x40 0xFE 0x00 0xFE 0x00 0xFE 0x00 0xFE 0x00 0xFE 0x00 0xFE 0x00 0xFC 0x00 0xF0 0x00 0x60 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x42 0x40 0x22 0x00 0x22 0x00 0x12 0x00 0x12 0x00 0xD2 0x00 0x92 0x00 0x9C 0x00 0x90 0x00 0x60 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
 	
-: dot
-	0x40
-
 # Macro to draw a sprite
 :macro draw A {
 	i := A
@@ -119,8 +116,8 @@
 	draw pig
 }
 
-:alias turn_counter v3
-:alias cpu_selected v4
+:alias prev_selected v4
+:alias selected     v5
 :alias stride		v6
 :alias x	    	v7
 :alias y      		v8
@@ -140,69 +137,43 @@
 	height := 128
 	draw background
 	
+	x_pos := 25
+	y_pos := 54
+	length := 16
+	height := 16
+
+	selected := 0
+	prev_selected := 0
+	
 	draw_cat
-	draw_heart
-	draw_zebra
-	draw_pig
 	
-	turn_counter := 0
-	x := 0
-	i := dot
-	
-	loop
-		turn_counter += 1
+	# Main game loop
+	loop		
+		v0 := OCTO_KEY_D if v0 key then selected += 1
+		v0 := OCTO_KEY_S if v0 key then return
 
-		cpu_selected := random 3
-		if cpu_selected == 0 begin y := 64 x := 61 end
-		if cpu_selected == 1 begin y := 0 x := 61 end
-		if cpu_selected == 2 begin y := 64 x := 61 end
-		if cpu_selected == 3 begin y := 0 x := 61 end
+		if selected > 3 then selected := 0
+		if selected != prev_selected begin
 
-		# Main game loop		
-		loop
-			if cpu_selected == 0 begin
-				sprite x y 1
-				if y > 32 then y -= 3
-				if y < 32 then x -= 3
-				if x >= 32 begin
-					again
-				else
-					draw_cat
-				end
-			end
-		loop
-			if cpu_selected == 1 begin
-				sprite x y 1
-				if y < 32 then y += 3
-				if y > 32 then x -= 3
-				if x >= 32 begin
-					again
-				else
-					draw_heart
-				end
-			end
-		loop
-			if cpu_selected == 2 begin
-				sprite x y 1
-				if y > 32 then y -= 3
-				if y < 32 then x += 3
-				if x <= 93 begin
-					again
-				else
-					draw_zebra
-				end
-			end
-		loop
-			if cpu_selected == 3 begin
-				sprite x y 1
-				if y < 32 then y += 3
-				if y > 32 then x += 3
-				if x <= 93 begin
-					again
-				else
-					draw_pig
-				end
-			end
-			
-			if turn_counter < 3 then 
-		again
+		if selected == 0 begin
+			prev_selected := 0
+			draw_cat
+			draw_pig
+		end
+		if selected == 1 begin
+			prev_selected := 1
+			draw_heart
+			draw_cat
+		end
+		if selected == 2 begin 
+			prev_selected := 2
+			draw_zebra
+			draw_heart
+		end
+		if selected == 3 begin 
+			prev_selected := 3
+			draw_pig
+			draw_zebra
+		end
+	end
+	again
