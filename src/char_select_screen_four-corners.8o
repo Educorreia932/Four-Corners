@@ -116,7 +116,11 @@
 	draw pig
 }
 
-:alias prev_selected v4
+:alias cat_pos v0
+:alias heart_pos v1
+:alias zebra_pos v2
+:alias pig_pos v3
+:alias removed v4
 :alias selected     v5
 :alias stride		v6
 :alias x	    	v7
@@ -128,6 +132,7 @@
 :alias length		vd
 :alias height		ve
 
+# runs at 20 cycles/frame
 : main
 	hires  # Set high resolution mode
 	plane 3
@@ -142,38 +147,66 @@
 	length := 16
 	height := 16
 
-	selected := 0
-	prev_selected := 0
+	# keeps track of on screen character to render
+	selected := 1
+	# keeps track of characters that have been eliminated
+	removed := 0
 	
 	draw_cat
 	
 	# Main game loop
-	loop		
-		v0 := OCTO_KEY_D if v0 key then selected += 1
-		v0 := OCTO_KEY_S if v0 key then return
+	loop
+		v0 := OCTO_KEY_S if v0 key begin
+			x := removed
+			x &= selected
+			if x == 0 then removed += selected
+		end
+		v0 := OCTO_KEY_D if v0 key begin
+			selected += selected
+		
+			if selected > 8 then selected := 1
 
-		if selected > 3 then selected := 0
-		if selected != prev_selected begin
-
-		if selected == 0 begin
-			prev_selected := 0
-			draw_cat
-			draw_pig
+			if selected == 0b0010 begin
+				x := removed
+				x &= selected
+				if x == 0 begin				
+					draw_cat
+					draw_heart
+				else
+					selected += selected
+				end
+			end
+			if selected == 0b0100 begin
+				x := removed
+				x &= selected
+				if x == 0 begin
+					draw_heart
+					draw_zebra
+				else
+					selected += selected
+				end
+			end
+			if selected == 0b1000 begin 
+				x := removed
+				x &= selected
+				if x == 0 begin
+					draw_zebra
+					draw_pig
+				else
+					selected += selected
+				end
+			end
+			if selected == 0b0001 begin 
+				x := removed
+				x &= selected
+				if x == 0 begin
+					draw_pig
+					draw_cat
+				else
+					selected += selected
+				end
+			end
 		end
-		if selected == 1 begin
-			prev_selected := 1
-			draw_heart
-			draw_cat
-		end
-		if selected == 2 begin 
-			prev_selected := 2
-			draw_zebra
-			draw_heart
-		end
-		if selected == 3 begin 
-			prev_selected := 3
-			draw_pig
-			draw_zebra
-		end
-	end
 	again
+	
+	
